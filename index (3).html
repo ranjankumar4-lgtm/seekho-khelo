@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffd23f">
+<title>सीखो और खेलो | Learn & Play</title>
+<style>
+:root{--bg:#fff3c4;--card:#ffffff;--ink:#27243a;--pill:#ffffff}
+@media (prefers-color-scheme:dark){:root{--bg:#1d1b30;--card:#2b2848;--ink:#f4f1ff;--pill:#3a3660}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Baloo 2","Noto Sans Devanagari","Segoe UI",system-ui,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:520px;padding:14px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;min-height:44px}
+.pill{background:var(--pill);color:var(--ink);border:3px solid var(--ink);border-radius:999px;padding:8px 18px;font-size:18px;font-weight:700;font-family:inherit;cursor:pointer}
+h1{text-align:center;font-size:34px;margin:6px 0 4px;line-height:1.2}
+.sub{text-align:center;font-size:18px;margin:0 0 14px;opacity:.8}
+.card{background:var(--card);border:3px solid var(--ink);border-radius:26px;padding:18px;text-align:center;box-shadow:0 6px 0 var(--ink)}
+.big-btn{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;padding:16px 20px;border:3px solid #27243a;border-radius:24px;font-size:26px;font-weight:800;font-family:inherit;color:#27243a;cursor:pointer;box-shadow:0 6px 0 #27243a}
+.big-btn:active,.opt:active,.node:active{transform:translateY(4px);box-shadow:0 2px 0 #27243a}
+.m0{background:#ff8a65}.m1{background:#4dd0e1}.m2{background:#aed581}.m3{background:#ba9bff}
+.prog{font-size:17px;font-weight:700;opacity:.75;margin-top:6px}
+.big{font-size:54px;line-height:1.3;min-height:80px;word-break:break-word;margin:4px 0}
+.qt{font-size:25px;font-weight:800;margin-bottom:10px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.opt{padding:16px 6px;font-size:27px;font-weight:800;font-family:inherit;color:#27243a;border:3px solid #27243a;border-radius:20px;cursor:pointer;box-shadow:0 5px 0 #27243a}
+.c0{background:#ffd23f}.c1{background:#ff8a65}.c2{background:#4dd0e1}.c3{background:#aed581}
+.opt.ok{background:#2ecc71;animation:pop .4s}
+.opt.bad{background:#bbb;opacity:.6;animation:shake .35s}
+@keyframes pop{50%{transform:scale(1.12)}}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.msg{font-size:28px;font-weight:800;margin:6px 0}
+.row{display:grid;gap:12px;margin-top:14px}
+.hero{display:flex;align-items:center;gap:10px;justify-content:center}
+.mas{width:84px;height:84px;display:block;animation:bob 2.4s ease-in-out infinite}
+.mas.lg{width:150px;height:150px}
+.eye{transform-box:fill-box;transform-origin:center;animation:blink 4s infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.bub{background:var(--bg);border:3px solid var(--ink);border-radius:18px;padding:8px 14px;font-weight:800;font-size:18px}
+.bub.story{font-size:20px;line-height:1.6;font-weight:600;text-align:left;margin:10px 0;padding:14px 16px}
+.chr{font-size:96px;line-height:1.1;animation:bob 2s ease-in-out infinite}
+.map{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+.node{display:flex;flex-direction:column;align-items:center;padding:10px 4px;border:3px solid #27243a;border-radius:22px;font-family:inherit;color:#27243a;cursor:pointer;box-shadow:0 5px 0 #27243a}
+.node.lock{opacity:.45;filter:grayscale(.6);cursor:default}
+.ne{font-size:38px;line-height:1.1}.nn{font-size:14px;font-weight:800;line-height:1.1;min-height:16px}.ns{font-size:14px;letter-spacing:1px}
+.st{display:inline-block;font-size:44px;animation:pop .5s both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+let L='hi',cur,game;
+const sv=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
+const $=s=>document.querySelector(s);
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick_=a=>a[rand(0,a.length-1)];
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=rand(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+
+const T={
+ title:{hi:'सीखो और खेलो',en:'Learn & Play'},
+ sub:{hi:'चिंटू के साथ 12 लेवल, कहानियाँ और मज़ा!',en:'12 levels, stories and fun with Chintu!'},
+ play:{hi:'खेलो',en:'Play'},lvl:{hi:'लेवल',en:'Level'},map:{hi:'नक्शा',en:'Map'},
+ mapt:{hi:'लेवल चुनो',en:'Pick a level'},
+ great:{hi:'शाबाश!',en:'Well done!'},retry:{hi:'फिर कोशिश करो',en:'Try again'},
+ again:{hi:'फिर खेलो',en:'Play again'},story:{hi:'कहानी सुनो',en:'Hear the story'},
+ nextlvl:{hi:'अगला लेवल',en:'Next level'},
+ howmany:{hi:'कितने हैं?',en:'How many?'},whatis:{hi:'यह क्या है?',en:'What is this?'},
+ plus:{hi:'जोड़',en:'plus'},minus:{hi:'घटा',en:'minus'},times:{hi:'गुणा',en:'times'},eq:{hi:'बराबर कितना?',en:'equals what?'},
+ big:{hi:'सबसे बड़ा नंबर कौन सा?',en:'Which number is biggest?'},
+ small:{hi:'सबसे छोटा नंबर कौन सा?',en:'Which number is smallest?'},
+ nextnum:{hi:'अगला नंबर कौन सा?',en:'Which number comes next?'},
+ done:{hi:'लेवल पूरा!',en:'Level complete!'},of:{hi:'सही',en:'correct'},ready:{hi:'तैयार?',en:'Ready?'},
+ lock:{hi:'पहले पिछला लेवल पूरा करो',en:'Finish the previous level first'}
+};
+const t=k=>T[k][L];
+const CHEER={hi:['वाह!','शाबाश!','बहुत बढ़िया!','सही जवाब!'],en:['Wow!','Well done!','Super!','Correct!']};
+const OOPS={hi:['कोई बात नहीं, फिर देखो','एक बार और!'],en:['No worries, look again','One more try!']};
+
+const N={
+ mouse:{hi:'माउस',en:'Mouse'},keyboard:{hi:'कीबोर्ड',en:'Keyboard'},monitor:{hi:'मॉनिटर',en:'Monitor'},
+ printer:{hi:'प्रिंटर',en:'Printer'},laptop:{hi:'लैपटॉप',en:'Laptop'},headphones:{hi:'हेडफोन',en:'Headphones'},
+ webcam:{hi:'वेबकैम',en:'Webcam'},speaker:{hi:'स्पीकर',en:'Speaker'},cpu:{hi:'सीपीयू',en:'CPU'},
+ browser:{hi:'ब्राउज़र',en:'Browser'},power:{hi:'पावर बटन',en:'Power button'},pendrive:{hi:'पेन ड्राइव',en:'Pen drive'}
+};
+const ID=(e,a)=>({e,q:T.whatis,a});
+const IDS=[ID('🖱️','mouse'),ID('⌨️','keyboard'),ID('🖥️','monitor'),ID('🖨️','printer'),ID('💻','laptop'),ID('🎧','headphones'),ID('📷','webcam'),ID('🔊','speaker')];
+const USE=[
+ {e:'✍️',q:{hi:'टाइप करने के लिए क्या चाहिए?',en:'What do we use to type?'},a:'keyboard'},
+ {e:'👆',q:{hi:'क्लिक करने के लिए क्या चाहिए?',en:'What do we use to click?'},a:'mouse'},
+ {e:'📄',q:{hi:'कागज़ पर छापने के लिए?',en:'What prints on paper?'},a:'printer'},
+ {e:'🎬',q:{hi:'वीडियो किस पर दिखता है?',en:'Where do we see videos?'},a:'monitor'},
+ {e:'🎵',q:{hi:'गाना चुपचाप कान में सुनने के लिए?',en:'What do we use to listen privately?'},a:'headphones'},
+ {e:'🧠',q:{hi:'कंप्यूटर का दिमाग कौन है?',en:'What is the brain of a computer?'},a:'cpu'},
+ {e:'🌐',q:{hi:'वेबसाइट किससे खोलते हैं?',en:'What do we use to open websites?'},a:'browser'},
+ {e:'🔌',q:{hi:'कंप्यूटर चालू करने का बटन कौन सा?',en:'Which button turns the computer on?'},a:'power'},
+ {e:'💾',q:{hi:'फाइल साथ ले जाने की छोटी चीज़?',en:'A small thing to carry files?'},a:'pendrive'}
+];
+const BANK=[...IDS,...USE];
+
+const LV=[
+ {k:'count',max:5,ch:'🐘',n:{hi:'गिनती',en:'Count'}},
+ {k:'count',max:10,ch:'🐵',n:{hi:'गिनती 10',en:'Count 10'}},
+ {k:'comp',set:'id',ch:'🤖',n:{hi:'कंप्यूटर',en:'Computer'}},
+ {k:'add',max:10,ch:'🦁',n:{hi:'जोड़',en:'Add'}},
+ {k:'big',ch:'🦒',n:{hi:'बड़ा-छोटा',en:'Big-Small'}},
+ {k:'comp',set:'use',ch:'🦜',n:{hi:'कंप्यूटर 2',en:'Computer 2'}},
+ {k:'sub',max:10,ch:'🐰',n:{hi:'घटाओ',en:'Subtract'}},
+ {k:'add',max:20,ch:'🐯',n:{hi:'जोड़ 20',en:'Add 20'}},
+ {k:'seq',ch:'🐢',n:{hi:'अगला नंबर',en:'Pattern'}},
+ {k:'sub',max:20,ch:'🦊',n:{hi:'घटाओ 20',en:'Subtract 20'}},
+ {k:'mul',ch:'🐼',n:{hi:'पहाड़ा',en:'Tables'}},
+ {k:'mix',ch:'🦄',n:{hi:'चैंपियन',en:'Champion'}}
+];
+const MIX=[{k:'add',max:20},{k:'sub',max:20},{k:'mul'},{k:'seq'},{k:'big'},{k:'comp',any:true},{k:'count',max:12}];
+
+const STORY=[
+{t:{hi:'हाथी हैप्पी',en:'Happy the Elephant'},
+ s:{hi:`एक जंगल में हैप्पी नाम का हाथी रहता था। उसे केले बहुत पसंद थे। एक दिन उसने गिना: एक, दो, तीन, चार, पाँच केले! वह बोला, गिनना कितना मज़ेदार है! तब से वह रोज़ अपने दोस्तों के साथ गिनती करता है।`,
+    en:`In a jungle lived an elephant named Happy. He loved bananas. One day he counted: one, two, three, four, five bananas! He said, counting is so much fun! Now he counts every day with his friends.`}},
+{t:{hi:'बंदर चिंटू',en:'Chintu the Monkey'},
+ s:{hi:`चिंटू बंदर पेड़ पर कूद रहा था। उसने देखा दस रंग-बिरंगे गुब्बारे उड़ रहे हैं। उसने एक-एक करके सब गिन लिए, पूरे दस! सब दोस्त ताली बजाने लगे। चिंटू बोला, ध्यान से देखो तो गिनती आसान है।`,
+    en:`Chintu the monkey was jumping on a tree. He saw ten colourful balloons floating up. He counted them one by one, exactly ten! All his friends clapped. Chintu said, look carefully and counting is easy.`}},
+{t:{hi:'रोबोट बोल्ट',en:'Bolt the Robot'},
+ s:{hi:`बोल्ट एक छोटा रोबोट था। वह बोला, देखो! माउस से क्लिक करते हैं, कीबोर्ड से टाइप करते हैं और मॉनिटर पर सब दिखता है। बच्चों ने सबके नाम सीख लिए। बोल्ट बहुत खुश हुआ और उसने सबको एक सितारा दिया!`,
+    en:`Bolt was a little robot. He said, look! We click with the mouse, type with the keyboard, and see everything on the monitor. The children learned all the names. Bolt was very happy and gave everyone a star!`}},
+{t:{hi:'शेर राजू',en:'Raju the Lion'},
+ s:{hi:`जंगल का राजा शेर राजू भूखा था। उसके पास तीन रोटियाँ थीं। दोस्त ने चार रोटियाँ और दीं। अब कुल सात रोटियाँ हो गईं! राजू ने सबके साथ बाँटकर खाईं। जोड़ने से चीज़ें बढ़ती हैं, और बाँटने से खुशी भी!`,
+    en:`Raju the lion, king of the jungle, was hungry. He had three rotis. A friend gave him four more. Now he had seven! Raju shared them with everyone. Adding makes things grow, and sharing makes happiness grow too!`}},
+{t:{hi:'जिराफ़ लंबू',en:'Lambu the Giraffe'},
+ s:{hi:`लंबू जिराफ़ सबसे ऊँचा था। उसका दोस्त खरगोश छोटा था। लंबू बोला, मैं बड़ा हूँ! खरगोश हँसकर बोला, पर मैं तेज़ दौड़ता हूँ! दोनों ने सीखा कि बड़ा और छोटा सिर्फ़ नाप है, पर हर कोई ख़ास होता है।`,
+    en:`Lambu the giraffe was the tallest. His friend the rabbit was small. Lambu said, I am big! The rabbit laughed and said, but I run fast! They learned that big and small are just sizes, and everyone is special.`}},
+{t:{hi:'तोता मिठ्ठू',en:'Mitthu the Parrot'},
+ s:{hi:`मिठ्ठू तोते को चित्र बनाना था। उसने कंप्यूटर चालू किया। कीबोर्ड से नाम लिखा, माउस से रंग भरे और प्रिंटर से तस्वीर निकाल ली। सबने कहा, वाह मिठ्ठू! कंप्यूटर को सही तरह से चलाओ तो बहुत काम आता है।`,
+    en:`Mitthu the parrot wanted to make a picture. He switched on the computer. He typed the name with the keyboard, coloured with the mouse, and printed it with the printer. Everyone said, wow Mitthu! A computer is very useful when we use it well.`}},
+{t:{hi:'खरगोश बन्नी',en:'Bunny the Rabbit'},
+ s:{hi:`बन्नी खरगोश के पास आठ गाजर थे। उसने दो गाजर अपने दोस्त को दे दिए। अब उसके पास छह गाजर बचे। दोस्त बहुत खुश हुआ। बन्नी बोला, घटाने से चीज़ें कम होती हैं, पर देने से प्यार बढ़ता है!`,
+    en:`Bunny the rabbit had eight carrots. He gave two to his friend. Now he had six left. His friend was very happy. Bunny said, taking away makes things less, but giving makes love grow!`}},
+{t:{hi:'बाघ टिम्मू',en:'Timmu the Tiger'},
+ s:{hi:`टिम्मू बाघ को खेल बहुत पसंद था। सुबह उसने दस गेंदें इकट्ठी कीं। शाम को आठ और मिलीं। कुल अठारह गेंदें हो गईं! उसने गाँव के सब बच्चों को बुलाया और सबने मिलकर खेला।`,
+    en:`Timmu the tiger loved games. In the morning he collected ten balls. In the evening he found eight more. Now he had eighteen balls! He called all the children of the village and everyone played together.`}},
+{t:{hi:'कछुआ धीरू',en:'Dheeru the Tortoise'},
+ s:{hi:`धीरू कछुआ धीरे-धीरे चलता था। वह रोज़ दो कदम ज़्यादा चलता: दो, चार, छह, आठ। देखो, एक नियम बन गया! कुछ दिन में वह नदी तक पहुँच गया। धीरे चलो पर रुको मत, जीत ज़रूर मिलेगी।`,
+    en:`Dheeru the tortoise walked slowly. Every day he walked two steps more: two, four, six, eight. See, a pattern! In a few days he reached the river. Walk slowly but never stop, and you will win.`}},
+{t:{hi:'लोमड़ी चंपा',en:'Champa the Fox'},
+ s:{hi:`चंपा लोमड़ी के पास बीस बेर थे। उसने पाँच बेर चिड़िया को दिए और सात बेर गिलहरी को। फिर उसने गिना कि कितने बचे! बाँटकर भी उसके पास आठ बेर बचे। चंपा सबकी प्यारी दोस्त बन गई।`,
+    en:`Champa the fox had twenty berries. She gave five to the bird and seven to the squirrel. Then she counted how many were left! Even after sharing, she had eight berries. Champa became everyone's dear friend.`}},
+{t:{hi:'पांडा पिंकू',en:'Pinku the Panda'},
+ s:{hi:`पिंकू पांडा की एक दुकान थी। हर डिब्बे में पाँच बाँस थे और डिब्बे थे तीन। पाँच तिया पंद्रह बाँस! गुणा से गिनती जल्दी हो जाती है। पिंकू ने पहाड़ा याद किया और उसकी दुकान सबसे तेज़ चलने लगी।`,
+    en:`Pinku the panda had a shop. Each box had five bamboo sticks, and there were three boxes. Five times three is fifteen! Multiplying counts fast. Pinku learned his tables, and his shop became the fastest in town.`}},
+{t:{hi:'जादुई घोड़ा',en:'The Magic Horse'},
+ s:{hi:`जंगल में बड़ा मेला लगा। जादुई घोड़े ने कहा, जो गणित और कंप्यूटर में होशियार होगा, उसे सोने का तारा मिलेगा। तुमने सब सवाल हल कर दिए! अब तुम होशियार चैंपियन हो। शाबाश, सबसे बड़ा सितारा तुम्हारा!`,
+    en:`A big fair came to the jungle. The magic horse said, whoever is smart in math and computers will get the golden star. You solved every question! Now you are a smart champion. Well done, the biggest star is yours!`}}
+];
+
+let prog=[];
+try{prog=JSON.parse(sv('prog')||'[]')}catch(e){}
+while(prog.length<LV.length)prog.push(0);
+const total=()=>prog.reduce((a,b)=>a+b,0);
+
+function opts(ans){const s=new Set([ans]);let g=0;while(s.size<4&&g++<300){const v=ans+rand(-5,5);if(v>=0)s.add(v)}
+ return shuffle([...s]).map(String)}
+
+function gen(c){
+ if(c.k==='mix')return gen(pick_(MIX));
+ if(c.k==='count'){const n=rand(1,c.max),em=pick_(['🍎','⭐','🐱','🎈','🚗','🌸','🐟']);
+  return{e:em.repeat(n),q:t('howmany'),say:t('howmany'),o:opts(n),a:String(n)}}
+ if(c.k==='add'){const m=c.max,a=rand(1,m-1),b=rand(1,m-a);
+  return{e:`${a} + ${b} = ?`,q:'',say:`${a} ${t('plus')} ${b} ${t('eq')}`,o:opts(a+b),a:String(a+b)}}
+ if(c.k==='sub'){const m=c.max,a=rand(2,m),b=rand(1,a);
+  return{e:`${a} − ${b} = ?`,q:'',say:`${a} ${t('minus')} ${b} ${t('eq')}`,o:opts(a-b),a:String(a-b)}}
+ if(c.k==='mul'){const x=pick_([2,3,4,5,10]),y=rand(1,10);
+  return{e:`${x} × ${y} = ?`,q:'',say:`${x} ${t('times')} ${y} ${t('eq')}`,o:opts(x*y),a:String(x*y)}}
+ if(c.k==='big'){const s=new Set();while(s.size<4)s.add(rand(1,20));const arr=[...s],mx=Math.random()<.5;
+  const a=mx?Math.max(...arr):Math.min(...arr),q=t(mx?'big':'small');
+  return{e:'🔢',q,say:q,o:shuffle(arr).map(String),a:String(a)}}
+ if(c.k==='seq'){const a=rand(1,5),st=pick_([1,2,3,5]),q=t('nextnum'),ans=a+3*st;
+  return{e:`${a}, ${a+st}, ${a+2*st}, ?`,q,say:`${a}, ${a+st}, ${a+2*st}. ${q}`,o:opts(ans),a:String(ans)}}
+ const it=c.any?pick_(BANK):game.bank[game.i],others=shuffle(Object.keys(N).filter(k=>k!==it.a)).slice(0,3),q=it.q[L];
+ return{e:it.e,q,say:q,o:shuffle([it.a,...others]).map(k=>N[k][L]),a:N[it.a][L]}
+}
+
+let ac;
+function beep(ok){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+ const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);
+ o.type=ok?'sine':'square';o.frequency.value=ok?660:200;g.gain.value=.1;o.start();
+ o.frequency.setValueAtTime(ok?880:150,ac.currentTime+.12);o.stop(ac.currentTime+.25)}catch(e){}}
+function speak(s){try{speechSynthesis.cancel();
+ s.split(/(?<=[।.!?])\s*/).filter(Boolean).forEach(p=>{const u=new SpeechSynthesisUtterance(p);
+  u.lang=L==='hi'?'hi-IN':'en-IN';u.rate=.85;speechSynthesis.speak(u)})}catch(e){}}
+
+function mas(s,lg){const m={n:'M38 66Q50 74 62 66',h:'M36 62Q50 84 64 62Z',s:'M40 74Q50 62 60 74'}[s||'n'];
+ return `<svg class="mas${lg?' lg':''}" viewBox="0 0 100 100"><g stroke="#27243a" stroke-width="3"><circle cx="14" cy="50" r="12" fill="#8d5a2b"/><circle cx="86" cy="50" r="12" fill="#8d5a2b"/><circle cx="50" cy="50" r="37" fill="#a86a35"/><ellipse cx="50" cy="60" rx="26" ry="22" fill="#f5c9a0"/><g class="eye"><circle cx="38" cy="44" r="7" fill="#fff"/><circle cx="62" cy="44" r="7" fill="#fff"/><circle cx="39" cy="45" r="3" fill="#27243a" stroke="none"/><circle cx="61" cy="45" r="3" fill="#27243a" stroke="none"/></g><ellipse cx="50" cy="55" rx="4" ry="3" fill="#6b3f1d"/><path d="${m}" fill="${s==='h'?'#e74c3c':'none'}" stroke-linecap="round"/></g></svg>`}
+
+const render=h=>{$('#app').innerHTML=h};
+const bar=lang=>`<div class="top">${lang?`<button class="pill" onclick="setL()">${L==='hi'?'English':'हिंदी'}</button>`:`<button class="pill" onclick="go(map)">🗺️ ${t('map')}</button>`}<div class="pill">⭐ ${total()}</div></div>`;
+function go(f,...a){cur=()=>f(...a);cur()}
+function setL(){L=L==='hi'?'en':'hi';cur()}
+
+function home(){game=null;
+ render(bar(true)+`<div class="card"><div class="hero">${mas('h',true)}</div><h1>${t('title')}</h1><p class="sub">${t('sub')}</p>
+ <button class="big-btn m2" onclick="go(map)">▶ ${t('play')}</button></div>`)}
+
+function map(){game=null;
+ const nodes=LV.map((c,i)=>{const open=i===0||prog[i-1]>0,st=prog[i];
+  return `<button class="node c${i%4}${open?'':' lock'}" onclick="${open?`go(start,${i})`:`speak(t('lock'))`}">
+  <div class="ne">${open?c.ch:'🔒'}</div><div class="nn">${i+1}. ${c.n[L]}</div><div class="ns">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</div></button>`}).join('');
+ render(bar(true)+`<h1 style="font-size:28px">🗺️ ${t('mapt')}</h1><div class="map">${nodes}</div>`)}
+
+function start(i){const c=LV[i];game={lv:i,c,i:0,n:c.k==='mix'?8:6,score:0};
+ if(c.k==='comp')game.bank=shuffle(c.set==='id'?IDS:USE).slice(0,game.n);
+ next()}
+function next(){if(game.i>=game.n)return end();game.q=gen(game.c);game.tried=false;show()}
+function show(){const q=game.q;
+ render(bar(false)+`<div class="card"><div class="hero"><div id="mas">${mas('n')}</div><div class="bub" id="bub">${t('lvl')} ${game.lv+1}: ${game.c.n[L]}</div></div>
+ <div class="prog">${game.i+1} / ${game.n}</div>
+ <div class="big">${q.e}</div><div class="qt">${q.q}</div>
+ <button class="pill" onclick="say()">🔊</button>
+ <div class="opts">${q.o.map((o,k)=>`<button class="opt c${k}" onclick="pick(this,${k})">${o}</button>`).join('')}</div></div>`);
+ setTimeout(say,300)}
+function say(){speak(game.q.say)}
+function react(s,txt){$('#mas').innerHTML=mas(s);$('#bub').textContent=txt}
+function pick(btn,k){if(btn.disabled)return;const q=game.q;
+ if(q.o[k]===q.a){
+  if(!game.tried)game.score++;
+  beep(true);const c=pick_(CHEER[L]);react('h',c);speak(c);btn.classList.add('ok');
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  game.i++;setTimeout(next,1100)
+ }else{game.tried=true;beep(false);const o=pick_(OOPS[L]);react('s',o);btn.classList.add('bad');btn.disabled=true;speak(o)}}
+
+function end(){const s=game.score,n=game.n,lv=game.lv;
+ const st=s>=n-1?3:s>=Math.ceil(n/2)?2:1;prog[lv]=Math.max(prog[lv],st);sv('prog',JSON.stringify(prog));
+ beep(true);speak(t('great'));
+ const last=lv>=LV.length-1;
+ render(bar(false)+`<div class="card"><div class="hero">${mas('h',true)}</div><div class="msg">🎉 ${t('done')}</div>
+ <div>${[0,1,2].map(i=>`<span class="st" style="animation-delay:${i*.25}s">${i<st?'⭐':'☆'}</span>`).join('')}</div>
+ <div class="msg">${s} / ${n} ${t('of')}</div>
+ <div class="row"><button class="big-btn m3" onclick="go(story,${lv})">📖 ${t('story')}</button>
+ <button class="big-btn m2" onclick="${last?'go(map)':`go(start,${lv+1})`}">${last?'🗺️ '+t('map'):'▶ '+t('nextlvl')}</button>
+ <button class="pill" onclick="go(start,${lv})">🔁 ${t('again')}</button></div></div>`)}
+
+function story(i){const S=STORY[i],last=i>=LV.length-1;
+ render(bar(true)+`<div class="card"><div class="chr">${LV[i].ch}</div><div class="msg">📖 ${S.t[L]}</div>
+ <div class="bub story">${S.s[L]}</div><button class="pill" onclick="speak(STORY[${i}].s[L])">🔊</button>
+ <div class="row"><button class="big-btn m2" onclick="${last?'go(map)':`go(start,${i+1})`}">${last?'🗺️ '+t('map'):'▶ '+t('nextlvl')}</button>
+ <button class="pill" onclick="go(map)">🗺️ ${t('map')}</button></div></div>`);
+ speak(S.s[L])}
+go(home);
+</script>
+</body>
+</html>
